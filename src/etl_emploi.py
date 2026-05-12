@@ -18,12 +18,14 @@ for col in ["Date", "Code département", "Code commune", "Sexe", "Tranche d'âge
 
 df["annee"] = df["Date"].str.split("-").str[0].astype(int)
 
-df = df[df["Code département"] == "62"]
+
+df = df[df["Code département"] == "31"]
+
 
 df = df[df["Sexe"] == "Total"]
 
 
-df = df[df["annee"].isin([2017, 2022])]
+df = df[df["annee"] == 2022]
 
 df = df[[
     "Code commune",
@@ -39,15 +41,50 @@ df = df.rename(columns={
     "Nombre de demandeurs d'emploi": "demandeurs_emploi"
 })
 
+
+df["demandeurs_emploi"] = pd.to_numeric(df["demandeurs_emploi"], errors="coerce")
+
+
 df = df.groupby(
     ["code_commune", "annee", "tranche_age"],
     as_index=False
 )["demandeurs_emploi"].sum()
+
+
+df = df.pivot(
+    index=["code_commune", "annee"],
+    columns="tranche_age",
+    values="demandeurs_emploi"
+).reset_index()
+
+
+df = df.rename(columns={
+    "Total": "emploi_total",
+    "Moins de 25 ans": "emploi_moins_25",
+    "De 25 à 49 ans": "emploi_25_49",
+    "50 ans et plus": "emploi_50_plus"
+})
+
+
+for col in ["emploi_total", "emploi_moins_25", "emploi_25_49", "emploi_50_plus"]:
+    if col not in df.columns:
+        df[col] = 0
+    df[col] = df[col].fillna(0).astype(int)
+
+
+df = df[[
+    "code_commune",
+    "annee",
+    "emploi_total",
+    "emploi_moins_25",
+    "emploi_25_49",
+    "emploi_50_plus"
+]]
 
 print(df.head())
 print(df.shape)
 
 df.to_csv("../data/donnes_clean/emploi_clean.csv", index=False)
 
-engine = create_engine("postgresql+psycopg2://postgres:mspr2026@localhost:5432/elections")
-df.to_sql("emploi", engine, if_exists="append", index=False)
+engine = create_engine("postgresql+psycopg2://postgres:mspr2026@localhost:5432/mspr_data_final")
+df.to_sql("donnees_emploi", engine, if_exists="append", index=False)
