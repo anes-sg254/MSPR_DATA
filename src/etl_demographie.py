@@ -1,9 +1,10 @@
 import pandas as pd
 from sqlalchemy import create_engine
+from db_utils import get_engine
 
 def nettoyer_demographie(path, annee, feuille, cols_source):
     df = pd.read_excel(path, sheet_name=feuille, header=4)
-
+    
     df.columns = df.iloc[0]
     df = df.iloc[1:].copy()
 
@@ -30,7 +31,7 @@ def nettoyer_demographie(path, annee, feuille, cols_source):
     })
 
     df["code_commune"] = df["code_commune"].astype(str).str.zfill(5)
-    df = df[df["code_commune"].str.startswith("31")]
+    df = df[df["code_commune"].str.startswith("33")]
 
     cols_num = [
         "population",
@@ -65,6 +66,7 @@ def nettoyer_demographie(path, annee, feuille, cols_source):
     return df.reset_index(drop=True)
 
 
+
 cols_2022 = {
     "population": "P22_POP",
     "pop_0_14": "P22_POP0014",
@@ -78,9 +80,10 @@ df2022 = nettoyer_demographie("../data/donnes/demographie_2_2022.xlsx", 2022, "C
 
 df2022.to_csv("../data/donnes_clean/demographie2_clean.csv", index=False)
 
+
 print(df2022.head())
 print(df2022["annee"].value_counts())
 print(df2022.shape)
 
-engine = create_engine("postgresql+psycopg2://postgres:mspr2026@localhost:5432/mspr_data_final")
+engine = get_engine()
 df2022.to_sql("donnees_demographie", engine, if_exists="append", index=False)

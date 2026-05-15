@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from sqlalchemy import create_engine
+from db_utils import get_engine
 
 df = pd.read_csv(
     "../data/donnes/securite.csv",
@@ -17,7 +18,7 @@ df["code_commune"] = df["code_commune"].astype(str).str.strip()
 df["indicateur"] = df["indicateur"].astype(str).str.strip()
 
 
-df = df[df["code_commune"].str.startswith("31")]
+df = df[df["code_commune"].str.startswith("33")]
 
 
 df["taux_pour_mille"] = df["taux_pour_mille"].replace("NA", np.nan)
@@ -124,5 +125,5 @@ print(df.shape)
 
 df.to_csv("../data/donnes_clean/securite_clean.csv", index=False)
 
-engine = create_engine("postgresql+psycopg2://postgres:mspr2026@localhost:5432/mspr_data_final")
+engine = get_engine()
 df.to_sql("donnees_securite", engine, if_exists="append", index=False)

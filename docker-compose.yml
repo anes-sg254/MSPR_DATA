@@ -1,0 +1,95 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: mspr-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mspr2026
+      POSTGRES_DB: mspr_data_final
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  prefect-server:
+    image: prefecthq/prefect:3-latest
+    container_name: prefect-server
+    command: prefect server start --host 0.0.0.0
+    ports:
+      - "4200:4200"
+    environment:
+      PREFECT_SERVER_API_HOST: 0.0.0.0
+      PREFECT_SERVER_UI_API_URL: http://localhost:4200/api
+    depends_on:
+      - postgres
+
+  worker-1:
+    build: .
+    image: mspr-prefect:latest
+    container_name: prefect-worker-1
+    working_dir: /app/src
+    command: python flow_referentiels.py
+    environment:
+      PREFECT_API_URL: http://prefect-server:4200/api
+      DB_USER: postgres
+      DB_PASSWORD: mspr2026
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mspr_data_final
+    depends_on:
+      - prefect-server
+      - postgres
+
+  worker-2:
+    build: .
+    image: mspr-prefect:latest
+    container_name: prefect-worker-2
+    working_dir: /app/src
+    command: python flow_socioeconomique.py
+    environment:
+      PREFECT_API_URL: http://prefect-server:4200/api
+      DB_USER: postgres
+      DB_PASSWORD: mspr2026
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mspr_data_final
+    depends_on:
+      - prefect-server
+      - postgres
+
+  worker-3:
+    build: .
+    image: mspr-prefect:latest
+    container_name: prefect-worker-3
+    working_dir: /app/src
+    command: python flow_electoral.py
+    environment:
+      PREFECT_API_URL: http://prefect-server:4200/api
+      DB_USER: postgres
+      DB_PASSWORD: mspr2026
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mspr_data_final
+    depends_on:
+      - prefect-server
+      - postgres
+
+  worker-master:
+    build: .
+    image: mspr-prefect:latest
+    container_name: prefect-worker-master
+    working_dir: /app/src
+    command: python flow_master.py
+    environment:
+      PREFECT_API_URL: http://prefect-server:4200/api
+      DB_USER: postgres
+      DB_PASSWORD: mspr2026
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: mspr_data_final
+    depends_on:
+      - prefect-server
+      - postgres
+
+volumes:
+  postgres_data:

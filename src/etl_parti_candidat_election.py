@@ -1,7 +1,8 @@
 import pandas as pd
 from sqlalchemy import create_engine
+from db_utils import get_engine
 
-engine = create_engine("postgresql+psycopg2://postgres:mspr2026@localhost:5432/mspr_data_final")
+engine = get_engine()
 
 df_parti = pd.DataFrame([
     {"id_parti": 1, "nom_parti": "extreme_gauche"},

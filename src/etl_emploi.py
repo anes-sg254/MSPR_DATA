@@ -1,5 +1,6 @@
 import pandas as pd
 from sqlalchemy import create_engine
+from db_utils import get_engine
 
 df = pd.read_csv(
     "../data/donnes/emploi_commune.csv",
@@ -19,7 +20,7 @@ for col in ["Date", "Code département", "Code commune", "Sexe", "Tranche d'âge
 df["annee"] = df["Date"].str.split("-").str[0].astype(int)
 
 
-df = df[df["Code département"] == "31"]
+df = df[df["Code département"] == "33"]
 
 
 df = df[df["Sexe"] == "Total"]
@@ -86,5 +87,5 @@ print(df.shape)
 
 df.to_csv("../data/donnes_clean/emploi_clean.csv", index=False)
 
-engine = create_engine("postgresql+psycopg2://postgres:mspr2026@localhost:5432/mspr_data_final")
+engine = get_engine()
 df.to_sql("donnees_emploi", engine, if_exists="append", index=False)

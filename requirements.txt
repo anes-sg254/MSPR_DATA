@@ -3,3 +3,7 @@ numpy
 matplotlib
 seaborn
 scikit-learn
+prefect
+psycopg2-binary
+openpyxl
+sqlalchemy

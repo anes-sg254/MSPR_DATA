@@ -1,5 +1,6 @@
 import pandas as pd
 from sqlalchemy import create_engine
+from db_utils import get_engine
 
 def nettoyer_economie(path, annee, feuille, cols_source):
     df = pd.read_excel(path, sheet_name=feuille, header=4)
@@ -38,7 +39,7 @@ def nettoyer_economie(path, annee, feuille, cols_source):
     })
 
     df["code_commune"] = df["code_commune"].astype(str).str.strip().str.zfill(5)
-    df = df[df["code_commune"].str.startswith("31")]
+    df = df[df["code_commune"].str.startswith("33")]
 
     cols_num = [
         "creations_total",
@@ -98,5 +99,5 @@ print(df2022.head())
 print(df2022["annee"].value_counts())
 print(df2022.shape)
 
-engine = create_engine("postgresql+psycopg2://postgres:mspr2026@localhost:5432/mspr_data_final")
+engine = get_engine()
 df2022.to_sql("donnees_economie", engine, if_exists="append", index=False)

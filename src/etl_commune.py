@@ -1,5 +1,6 @@
 import pandas as pd
 from sqlalchemy import create_engine
+from db_utils import get_engine
 
 def nettoyer_communes(path, feuille):
     df = pd.read_excel(path, sheet_name=feuille, header=4)
@@ -20,9 +21,9 @@ def nettoyer_communes(path, feuille):
     df["code_commune"] = df["code_commune"].astype(str)
     df["commune"] = df["commune"].astype(str).str.strip()
 
-    df = df[df["code_commune"].str.startswith("31")]
+    df = df[df["code_commune"].str.startswith("33")]
 
-    # enlever doublons éventuels
+   
     df = df.drop_duplicates(subset=["code_commune", "commune"])
 
     return df.reset_index(drop=True)
@@ -35,5 +36,5 @@ df_communes.to_csv("../data/donnes_clean/communes_clean.csv", index=False)
 print(df_communes.head())
 print(df_communes.shape)
 
-engine = create_engine("postgresql+psycopg2://postgres:mspr2026@localhost:5432/mspr_data_final")
+engine = get_engine()
 df_communes.to_sql("commune", engine, if_exists="append", index=False)

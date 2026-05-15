@@ -1,5 +1,6 @@
 import pandas as pd
 from sqlalchemy import create_engine
+from db_utils import get_engine
 
 def nettoyer_participation(path, id_election):
     df = pd.read_csv(
@@ -15,7 +16,7 @@ def nettoyer_participation(path, id_election):
 
     
     df["code_commune"] = df["code_commune"].astype(str).str.strip().str.zfill(5)
-    df = df[df["code_commune"].str.startswith("31")]
+    df = df[df["code_commune"].str.startswith("33")]
 
     
     df = df[[
@@ -67,5 +68,5 @@ print(df_participation.shape)
 
 df_participation.to_csv("../data/donnes_clean/participation_2022_clean.csv", index=False)
 
-engine = create_engine("postgresql+psycopg2://postgres:mspr2026@localhost:5432/mspr_data_final")
+engine =get_engine()
 df_participation.to_sql("participation", engine, if_exists="append", index=False)
